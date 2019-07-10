@@ -1,0 +1,49 @@
+$Group "game"
+{
+	"client"
+	"server"
+	"missionchooser"
+}
+
+$Group "shaders"
+{
+	"shaderlib"
+//	"game_shader"
+}
+
+$Group "everything"
+{
+	"client"
+	"server"
+	"missionchooser"
+	"shaderlib"
+//	"game_shader"
+}
+
+$Group "libraries"
+{
+	"tier1"
+	"fgdlib"
+	"raytrace"
+	"vgui_controls"
+	"mathlib"
+}
+
+$Group "utils"
+{
+	"glview"
+	"height2normal"
+	"motionmapper"
+	"phonemeextractor"
+	"qc_eyes"
+	"serverplugin_empty"
+	"tgadiff"
+	"vbsp"
+	"vice"
+	vrad_dll"
+	"vrad_launcher"
+	"vtf2tga"
+	"vtfdiff"
+	"vvis_dll"
+	"vvis_launcher"
+}

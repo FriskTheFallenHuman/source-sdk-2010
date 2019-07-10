@@ -1,0 +1,129 @@
+$Project "client"
+{
+	"game\client\client_swarm.vpc"	[$SWARM]
+}
+
+$Project "server"
+{
+	"game\server\server_swarm.vpc"	[$SWARM]
+}
+
+$Project "missionchooser"
+{
+	"game\missionchooser\missionchooser_swarm.vpc"	[$SWARM]
+}
+
+$Project "shaderlib"
+{
+	"materialsystem\shaderlib\shaderlib.vpc"
+}
+
+$Project "game_shader"
+{
+	"materialsystem\stdshaders\game_shader_dx9.vpc"
+}
+
+$Project "filesystem_stdio"
+{
+	"filesystem\filesystem_stdio.vpc"
+}
+
+$Project "tier1"
+{
+	"tier1\tier1.vpc"
+}
+
+$Project "mathlib"
+{
+	"mathlib\mathlib.vpc"
+}
+
+$Project "fgdlib"
+{
+	"fgdlib\fgdlib.vpc"
+}
+
+$Project "raytrace"
+{
+	"raytrace\raytrace.vpc"
+}
+
+$Project "vgui_controls"
+{
+	"vgui2\vgui_controls\vgui_controls.vpc"
+}
+
+$Project "glview"
+{
+	"utils\glview\glview.vpc" [$WIN32]
+}
+
+$Project "height2normal"
+{
+	"utils\height2normal\height2normal.vpc" [$WIN32]
+}
+
+$Project "motionmapper"
+{
+	"utils\motionmapper\motionmapper.vpc" [$WIN32]
+}
+
+$Project "phonemeextractor"
+{
+	"utils\phonemeextractor\phonemeextractor.vpc" [$WIN32]
+}
+
+$Project "qc_eyes"
+{
+	"utils\qc_eyes\qc_eyes.vpc" [$WIN32]
+}
+
+$Project "serverplugin_empty"
+{
+	"utils\serverplugin_sample\serverplugin_empty.vpc" [$WIN32||$POSIX]
+}
+
+$Project "tgadiff"
+{
+	"utils\tgadiff\tgadiff.vpc" [$WIN32]
+}
+
+$Project "vbsp"
+{
+	"utils\vbsp\vbsp.vpc" [$WIN32]
+}
+
+$Project "vice"
+{
+	"utils\vice\vice.vpc" [$WIN32]
+}
+
+$Project "vrad_dll"
+{
+	"utils\vrad\vrad_dll.vpc" [$WIN32]
+}
+
+$Project "vrad_launcher"
+{
+	"utils\vrad_launcher\vrad_launcher.vpc" [$WIN32]
+}
+
+$Project "vtf2tga"
+{
+	"utils\vtf2tga\vtf2tga.vpc" [$WIN32]
+}
+
+$Project "vtfdiff"
+{
+	"utils\vtfdiff\vtfdiff.vpc" [$WIN32]
+}
+
+$Project "vvis_dll"
+{
+	"utils\vvis\vvis_dll.vpc" [$WIN32]
+}
+
+$Project "vvis_launcher"
+{
+	"utils\vvis_launcher\vvis_launcher.vpc" [$WIN32]
+}
