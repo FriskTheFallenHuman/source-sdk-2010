@@ -238,7 +238,7 @@ public:
 	int					GetGameLumpFlags( GameLumpHandle_t handle );
 	int					GetGameLumpVersion( GameLumpHandle_t handle );
 	void				ComputeGameLumpSizeAndCount( int& size, int& clumpCount );
-	void				ParseGameLump( dheader_t* pHeader );
+	void				ParseGameLump( BSPHeader_t* pHeader );
 	void				SwapGameLump( GameLumpId_t id, int version, byte *dest, byte *src, int size );
 
 

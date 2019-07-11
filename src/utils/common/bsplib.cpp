@@ -1152,7 +1152,7 @@ void CGameLump::SwapGameLump( GameLumpId_t id, int version, byte *dest, byte *sr
 //-----------------------------------------------------------------------------
 // Game lump file I/O
 //-----------------------------------------------------------------------------
-void CGameLump::ParseGameLump( dheader_t* pHeader )
+void CGameLump::ParseGameLump( BSPHeader_t* pHeader )
 {
 	g_GameLumps.DestroyAllGameLumps();
 

@@ -3308,7 +3308,7 @@ void MathLib_Init( float gamma, float texGamma, float brightness, int overbright
 
 #if !defined( _X360 )
 	// Grab the processor information:
-	const CPUInformation& pi = *GetCPUInformation();
+	const CPUInformation& pi = GetCPUInformation();
 
 	// Select the default generic routines.
 	pfSqrt = _sqrtf;
