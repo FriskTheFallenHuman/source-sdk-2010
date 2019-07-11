@@ -28,7 +28,7 @@ CReliableTimer::CReliableTimer()
 	{
 		// Are we on a bad CPU?
 		sm_bUseQPC = false; // todo
-		const CPUInformation &cpu = *GetCPUInformation();
+		const CPUInformation &cpu = GetCPUInformation();
 		sm_bUseQPC = ( ( 0 == Q_stricmp( cpu.m_szProcessorID, "AuthenticAMD" ) )
 			&& ( cpu.m_nPhysicalProcessors > 1 )
 			&& !cpu.m_bSSE41 );

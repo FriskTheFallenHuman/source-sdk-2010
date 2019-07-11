@@ -280,6 +280,13 @@ typedef double				float64;
 typedef unsigned int		uint;
 
 
+// MSVC CRT uses 0x7fff while gcc uses MAX_INT, leading to mismatches between platforms
+// As a result, we pick the least common denominator here.  This should be used anywhere
+// you might typically want to use RAND_MAX
+#define VALVE_RAND_MAX 0x7fff
+
+
+
 // Maximum and minimum representable values
 #ifndef PLATFORM_OSX
 
@@ -507,6 +514,8 @@ typedef unsigned int		uint;
 #define ALIGN128_POST
 #endif
 
+// Pull in the /analyze code annotations.
+#include "annotations.h"
 
 // This can be used to declare an abstract (interface only) class.
 // Classes marked abstract should not be instantiated.  If they are, and access violation will occur.

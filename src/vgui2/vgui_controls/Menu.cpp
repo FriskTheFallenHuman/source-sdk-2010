@@ -769,7 +769,7 @@ void Menu::PerformLayout()
 		AddScrollBar();
 
 		// This fills in m_VisibleSortedItems as needed
-		MakeItemsVisibleInScrollRange( m_iNumVisibleLines, min( fullHeightWouldRequire, workTall ) );
+		MakeItemsVisibleInScrollRange( m_iNumVisibleLines, MIN( fullHeightWouldRequire, workTall ) );
 	}
 	else
 	{
