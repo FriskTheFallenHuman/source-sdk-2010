@@ -36,7 +36,7 @@
 // for structures that are written to file for use by the game.
 BEGIN_BYTESWAP_DATADESC( BSPHeader_t )
 	DEFINE_FIELD( ident, FIELD_INTEGER ),
-	DEFINE_FIELD( version, FIELD_INTEGER ),
+	DEFINE_FIELD( m_nVersion, FIELD_INTEGER ),
 	DEFINE_EMBEDDED_ARRAY( lumps, HEADER_LUMPS ),
 	DEFINE_FIELD( mapRevision, FIELD_INTEGER ),
 END_BYTESWAP_DATADESC()
@@ -368,8 +368,6 @@ BEGIN_BYTESWAP_DATADESC( StaticPropLump_t )
 	DEFINE_FIELD( m_FadeMaxDist, FIELD_FLOAT ),
 	DEFINE_FIELD( m_LightingOrigin, FIELD_VECTOR ),
 	DEFINE_FIELD( m_flForcedFadeScale, FIELD_FLOAT ),
-	DEFINE_FIELD( m_nMinDXLevel, FIELD_SHORT ),
-	DEFINE_FIELD( m_nMaxDXLevel, FIELD_SHORT ),
 END_BYTESWAP_DATADESC()
 
 BEGIN_BYTESWAP_DATADESC( StaticPropLumpV4_t )
@@ -700,7 +698,7 @@ template <class T> static void WriteData( int fieldType, T *pData, int count = 1
 template< class T > static void AddLump( int lumpnum, T *pData, int count, int version = 0 );
 template< class T > static void AddLump( int lumpnum, CUtlVector<T> &data, int version = 0 );
 
-dheader_t		*g_pBSPHeader;
+BSPHeader_t		*g_pBSPHeader;
 FileHandle_t	g_hBSPFile;
 
 struct Lump_t
@@ -2105,15 +2103,15 @@ void LoadLeafAmbientLighting( int numLeafs )
 	}
 }
 
-void ValidateHeader( const char *filename, const dheader_t *pHeader )
+void ValidateHeader( const char *filename, const BSPHeader_t *pHeader )
 {
 	if ( pHeader->ident != IDBSPHEADER )
 	{
 		Error ("%s is not a IBSP file", filename);
 	}
-	if ( pHeader->version < MINBSPVERSION || pHeader->version > BSPVERSION )
+	if ( pHeader->m_nVersion < MINBSPVERSION || pHeader->m_nVersion > BSPVERSION )
 	{
-		Error ("%s is version %i, not %i", filename, pHeader->version, BSPVERSION);
+		Error ("%s is version %i, not %i", filename, pHeader->m_nVersion, BSPVERSION);
 	}
 }
 
@@ -2453,10 +2451,10 @@ void LoadBSPFileTexinfo( const char *filename )
 	FILE		*f;
 	int		length, ofs;
 
-	g_pBSPHeader = (dheader_t*)malloc( sizeof(dheader_t) );
+	g_pBSPHeader = (BSPHeader_t *)malloc( sizeof(BSPHeader_t) );
 
 	f = fopen( filename, "rb" );
-	fread( g_pBSPHeader, sizeof(dheader_t), 1, f);
+	fread( g_pBSPHeader, sizeof(BSPHeader_t), 1, f);
 
 	ValidateHeader( filename, g_pBSPHeader );
 
@@ -2572,12 +2570,12 @@ void WriteBSPFile( const char *filename, char *pUnused )
 		return;
 	}
 
-	dheader_t outHeader;
+	BSPHeader_t outHeader;
 	g_pBSPHeader = &outHeader;
-	memset( g_pBSPHeader, 0, sizeof( dheader_t ) );
+	memset( g_pBSPHeader, 0, sizeof(BSPHeader_t) );
 
 	g_pBSPHeader->ident = IDBSPHEADER;
-	g_pBSPHeader->version = BSPVERSION;
+	g_pBSPHeader->m_nVersion = BSPVERSION;
 	g_pBSPHeader->mapRevision = g_MapRevision;
 
 	g_hBSPFile = SafeOpenWrite( filename );
@@ -3349,6 +3347,16 @@ public:
 	bool EnumerateLeavesInBox( Vector const& mins, Vector const& maxs, ISpatialLeafEnumerator* pEnum, int context );
 	bool EnumerateLeavesInSphere( Vector const& center, float radius, ISpatialLeafEnumerator* pEnum, int context );
 	bool EnumerateLeavesAlongRay( Ray_t const& ray, ISpatialLeafEnumerator* pEnum, int context );
+	bool EnumerateLeavesInSphereWithFlagSet(const Vector& center, float radius, ISpatialLeafEnumerator* pEnum, int context, int nFlagsCheck);
+	int ListLeavesInBox(const Vector& mins, const Vector& maxs, unsigned short* pList, int listMax);
+
+	// Used to determine which leaves passed in (specified by leafcount, pLeafs, and nLeafStride ) 
+	// are within radius flRadius of vecCenter and have the flag set.
+	// The result is placed in the pLeafsInSphere array, which specifies _indices_ into the original pLeafs array
+	// The number of leaves found within the sphere is the return value.
+	// The caller is expected to have allocated at least nLeafCount pLeafsInSphere to place the results into
+	int ListLeavesInSphereWithFlagSet(int* pLeafsInSphere, const Vector& vecCenter, float flRadius, int nLeafCount, const uint16* pLeafs, int nLeafStride = sizeof(uint16), int nFlagsCheck = 0xFFFFFFFF);
+
 };
 
 
@@ -4400,7 +4408,7 @@ int SortLumpsByOffset( const SortedLump_t *pSortedLumpA, const SortedLump_t *pSo
 	return 0;
 }
 
-bool CompressGameLump( dheader_t *pInBSPHeader, dheader_t *pOutBSPHeader, CUtlBuffer &outputBuffer, CompressFunc_t pCompressFunc )
+bool CompressGameLump( BSPHeader_t *pInBSPHeader, BSPHeader_t *pOutBSPHeader, CUtlBuffer &outputBuffer, CompressFunc_t pCompressFunc )
 {
 	CByteswap	byteSwap;
 
@@ -4470,7 +4478,7 @@ bool CompressBSP( CUtlBuffer &inputBuffer, CUtlBuffer &outputBuffer, CompressFun
 {
 	CByteswap	byteSwap;
 
-	dheader_t *pInBSPHeader = (dheader_t *)inputBuffer.Base();
+	BSPHeader_t *pInBSPHeader = (BSPHeader_t *)inputBuffer.Base();
 	if ( pInBSPHeader->ident != BigLong( IDBSPHEADER ) || !pCompressFunc )
 	{
 		// only compress 360 bsp's
@@ -4483,9 +4491,9 @@ bool CompressBSP( CUtlBuffer &inputBuffer, CUtlBuffer &outputBuffer, CompressFun
 
 	// output will be smaller, use input size as upper bound
 	outputBuffer.EnsureCapacity( inputBuffer.TellMaxPut() );
-	outputBuffer.Put( pInBSPHeader, sizeof( dheader_t ) );
+	outputBuffer.Put( pInBSPHeader, sizeof(BSPHeader_t) );
 
-	dheader_t *pOutBSPHeader = (dheader_t *)outputBuffer.Base();
+	BSPHeader_t *pOutBSPHeader = (BSPHeader_t *)outputBuffer.Base();
 
 	// must adhere to input lump's offset order and process according to that, NOT lump num
 	// sort by offset order
@@ -4624,8 +4632,8 @@ bool SwapBSPFile( const char *pInFilename, const char *pOutFilename, bool bSwapO
 	BuildStaticPropNameTable();
 
 	// Set the output file pointer after the header
-	dheader_t dummyHeader = { 0 };
-	SafeWrite( g_hBSPFile, &dummyHeader, sizeof( dheader_t ) );
+	BSPHeader_t dummyHeader = { 0 };
+	SafeWrite( g_hBSPFile, &dummyHeader, sizeof(BSPHeader_t) );
 
 	// To allow for alignment fixups, the lumps will be written to the
 	// output file in the order they appear in this function.
@@ -4803,7 +4811,7 @@ bool GetPakFileLump( const char *pBSPFilename, void **pPakData, int *pPakSize )
 	}
 
 	// determine endian nature
-	dheader_t *pHeader;
+	BSPHeader_t *pHeader;
 	LoadFile( pBSPFilename, (void **)&pHeader );
 	bool bSwap = ( pHeader->ident == BigLong( IDBSPHEADER ) );
 	free( pHeader );
@@ -4890,7 +4898,7 @@ bool SetPakFileLump( const char *pBSPFilename, const char *pNewFilename, void *p
 	}
 
 	// determine endian nature
-	dheader_t *pHeader;
+	BSPHeader_t *pHeader;
 	LoadFile( pBSPFilename, (void **)&pHeader );
 	bool bSwap = ( pHeader->ident == BigLong( IDBSPHEADER ) );
 	free( pHeader );
@@ -4902,7 +4910,7 @@ bool SetPakFileLump( const char *pBSPFilename, const char *pNewFilename, void *p
 
 	// save a copy of the old header
 	// generating a new bsp is a destructive operation
-	dheader_t oldHeader;
+	BSPHeader_t oldHeader;
 	oldHeader = *g_pBSPHeader;
 
 	g_hBSPFile = SafeOpenWrite( pNewFilename );

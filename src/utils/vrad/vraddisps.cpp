@@ -417,7 +417,9 @@ void CVRadDispMgr::DispBuilderInit( CCoreDispInfo *pBuilderDisp, dface_t *pFace,
 		pDisp->minTess, 
 		pDisp->smoothingAngle,
 		pVerts,
-		pTris );
+		pTris,
+		/* int flags */,
+		/* const CDispMultiBlend *pvMultiBlends */);
 }
 
 

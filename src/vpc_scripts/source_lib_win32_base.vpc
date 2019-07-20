@@ -82,5 +82,16 @@ $Project
 				}
 			}
 		}
+		
+		$File	"$SRCDIR\public\tier0\spew.cpp"
+		{
+			$Configuration
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+				}
+			}
+		}
 	}
 }

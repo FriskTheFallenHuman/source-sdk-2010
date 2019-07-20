@@ -272,7 +272,7 @@ void DispMapToCoreDispInfo( mapdispinfo_t *pMapDisp, CCoreDispInfo *pCoreDispInf
 
 	// Use CCoreDispInfo to setup the actual vertex positions.
 	pCoreDispInfo->InitDispInfo( pMapDisp->power, pMapDisp->minTess, pMapDisp->smoothingAngle,
-						 pMapDisp->alphaValues, vectorDisps, dispDists );
+						 pMapDisp->alphaValues, vectorDisps, dispDists, pMapDisp->flags, /* const CDispMultiBlend *pvMultiBlends */ );
 	pCoreDispInfo->Create();
 }
 

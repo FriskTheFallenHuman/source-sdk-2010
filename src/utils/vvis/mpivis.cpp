@@ -22,6 +22,7 @@
 #include "vmpi_tools_shared.h"
 #include <conio.h>
 #include "scratchpad_helpers.h"
+#include "tier0/fasttimer.h"
 
 
 #define VMPI_VVIS_PACKET_ID						1

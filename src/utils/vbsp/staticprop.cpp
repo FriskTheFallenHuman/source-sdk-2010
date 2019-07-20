@@ -505,8 +505,6 @@ static void AddStaticPropToLump( StaticPropBuild_t const& build )
 	propLump.m_FadeMinDist = build.m_FadeMinDist;
 	propLump.m_FadeMaxDist = build.m_FadeMaxDist;
 	propLump.m_flForcedFadeScale = build.m_flForcedFadeScale;
-	propLump.m_nMinDXLevel = build.m_nMinDXLevel;
-	propLump.m_nMaxDXLevel = build.m_nMaxDXLevel;
 	
 	if (build.m_pLightingOrigin && *build.m_pLightingOrigin)
 	{
@@ -616,7 +614,7 @@ void EmitStaticProps()
 
 			if (IntForKey( &entities[i], "screenspacefade" ) == 1)
 			{
-				build.m_Flags |= STATIC_PROP_SCREEN_SPACE_FADE;
+				build.m_Flags |= STATIC_PROP_SCREEN_SPACE_FADE_OBSOLETE;
 			}
 
 			const char *pKey = ValueForKey( &entities[i], "fadescale" );
