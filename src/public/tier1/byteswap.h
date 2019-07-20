@@ -127,7 +127,7 @@ public:
 		if( output == nativeConstant )
 			return 0;
 
-		Assert( 0 );		// if we get here, input is neither a swapped nor unswapped version of nativeConstant.
+		assert( 0 );		// if we get here, input is neither a swapped nor unswapped version of nativeConstant.
 		return -1;
 	}
 
@@ -140,8 +140,8 @@ public:
 	//-----------------------------------------------------------------------------
 	template<typename T> inline void SwapBuffer( T* outputBuffer, T* inputBuffer = NULL, int count = 1 )
 	{
-		Assert( count >= 0 );
-		Assert( outputBuffer );
+		assert( count >= 0 );
+		assert( outputBuffer );
 
 		// Fail gracefully in release:
 		if( count <=0 || !outputBuffer )

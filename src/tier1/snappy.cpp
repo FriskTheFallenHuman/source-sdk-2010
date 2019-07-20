@@ -190,8 +190,8 @@ static inline char* EmitLiteral(char* op,
       n >>= 8;
       count++;
     }
-	assert(count >= 1);
-	assert(count <= 4);
+    assert(count >= 1);
+    assert(count <= 4);
     *base = LITERAL | ((59+count) << 2);
   }
   memcpy(op, literal, len);
@@ -205,7 +205,7 @@ static inline char* EmitCopyLessThan64(char* op, int offset, int len) {
 
   if ((len < 12) && (offset < 2048)) {
     int len_minus_4 = len - 4;
-	assert(len_minus_4 < 8);            // Must fit in 3 bits
+    assert(len_minus_4 < 8);            // Must fit in 3 bits
     *op++ = COPY_1_BYTE_OFFSET | ((len_minus_4) << 2) | ((offset >> 8) << 5);
     *op++ = offset & 0xff;
   } else {

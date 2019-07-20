@@ -114,6 +114,8 @@ int 	ParseNum (char *str);
 #define CP_NOTIFY	stdout, 1, 1, 1, 1
 void ColorPrintf( FILE *pFile, bool red, bool green, bool blue, bool intensity, PRINTF_FORMAT_STRING char const *pFormat, ... );
 
+#pragma message("cmdlib.h: REWRITE SPEW FUNCTIONS")
+
 // Initialize spew output.
 void InstallSpewFunction();
 

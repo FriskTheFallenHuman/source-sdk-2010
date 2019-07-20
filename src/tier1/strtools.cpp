@@ -1020,7 +1020,7 @@ char *V_pretifymem( float value, int digitsafterdecimal /*= 2*/, bool usebinaryo
 	char val[ 32 ];
 
 	// Clamp to >= 0
-	digitsafterdecimal = MAX( digitsafterdecimal, 0 );
+	digitsafterdecimal = max( digitsafterdecimal, 0 );
 
 	// If it's basically integral, don't do any decimals
 	if ( FloatMakePositive( value - (int)value ) < 0.00001 )
@@ -1449,7 +1449,7 @@ int V_UnicodeToUCS2( const wchar_t *pUnicode, int cubSrcInBytes, char *pUCS2, in
 #ifdef _WIN32
 	// Figure out which buffer is smaller and convert from bytes to character
 	// counts.
-	int cchResult = MIN( (size_t)cubSrcInBytes/sizeof(wchar_t), cubDestSizeInBytes/sizeof(wchar_t) );
+	int cchResult = min( (size_t)cubSrcInBytes/sizeof(wchar_t), cubDestSizeInBytes/sizeof(wchar_t) );
 	wchar_t *pDest = (wchar_t*)pUCS2;
 	wcsncpy( pDest, pUnicode, cchResult );
 	// Make sure we NULL-terminate.
@@ -1610,7 +1610,7 @@ unsigned char V_nibble( char c )
 void V_hextobinary( char const *in, int numchars, byte *out, int maxoutputbytes )
 {
 	int len = V_strlen( in );
-	numchars = MIN( len, numchars );
+	numchars = min( len, numchars );
 	// Make sure it's even
 	numchars = ( numchars ) & ~0x1;
 
@@ -1721,7 +1721,7 @@ void V_FileBase( const char *in, char *out, int maxlen )
 	// Length of new sting
 	len = end - start + 1;
 
-	int maxcopy = MIN( len + 1, maxlen );
+	int maxcopy = min( len + 1, maxlen );
 
 	// Copy partial string
 	V_strncpy( out, &in[start], maxcopy );
@@ -1765,7 +1765,7 @@ void V_StripExtension( const char *in, char *out, int outSize )
 
 	if (end > 0 && !PATHSEPARATOR( in[end] ) && end < outSize)
 	{
-		int nChars = MIN( end, outSize-1 );
+		int nChars = min( end, outSize-1 );
 		if ( out != in )
 		{
 			memcpy( out, in, nChars );
@@ -2012,7 +2012,7 @@ bool V_ExtractFilePath (const char *path, char *dest, int destSize )
 		src--;
 	}
 
-	int copysize = MIN( src - path, destSize - 1 );
+	int copysize = min( src - path, destSize - 1 );
 	memcpy( dest, path, copysize );
 	dest[copysize] = 0;
 
@@ -2403,7 +2403,7 @@ char* AllocString( const char *pStr, int nMaxChars )
 	if ( nMaxChars == -1 )
 		allocLen = strlen( pStr ) + 1;
 	else
-		allocLen = MIN( (int)strlen(pStr), nMaxChars ) + 1;
+		allocLen = min( (int)strlen(pStr), nMaxChars ) + 1;
 
 	char *pOut = new char[allocLen];
 	V_strncpy( pOut, pStr, allocLen );
@@ -2910,6 +2910,8 @@ void V_qsort_s( void *base, size_t num, size_t width, int ( __cdecl *compare )(v
 //-----------------------------------------------------------------------------
 bool BGetLocalFormattedDateAndTime( time_t timeVal, char *pchDate, int cubDate, char *pchTime, int cubTime )
 {
+#pragma message("strtools.cpp: Re-implement BGetLocalFormattedDateAndTime()")
+#if 0
 	if ( 0 == timeVal || timeVal < 0 )
 	{
 		// get the current time
@@ -2977,6 +2979,7 @@ bool BGetLocalFormattedDateAndTime( time_t timeVal, char *pchDate, int cubDate, 
 #endif
 		return true;
 	}
+#endif
 
 	return false;
 }

@@ -18,6 +18,10 @@ FORWARD_DECLARE_HANDLE( memhandle_t );
 
 #define INVALID_MEMHANDLE ((memhandle_t)0xffffffff)
 
+#ifdef UnlockResource
+#undef UnlockResource
+#endif
+
 class CDataManagerBase
 {
 public:

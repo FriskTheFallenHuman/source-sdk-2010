@@ -517,6 +517,12 @@ typedef unsigned int		uint;
 // Pull in the /analyze code annotations.
 #include "annotations.h"
 
+//-----------------------------------------------------------------------------
+// Convert int<-->pointer, avoiding 32/64-bit compiler warnings:
+//-----------------------------------------------------------------------------
+#define INT_TO_POINTER( i ) (void *)( ( i ) + (char *)NULL )
+#define POINTER_TO_INT( p ) ( (int)(uintp)( p ) )
+
 // This can be used to declare an abstract (interface only) class.
 // Classes marked abstract should not be instantiated.  If they are, and access violation will occur.
 //
@@ -1039,12 +1045,22 @@ inline void SwapFloat( float *pOut, const float *pIn )		{ SafeSwapFloat( pOut, p
 		__storedoublewordbytereverse( nWord, nWordIndex<<2, base );
 	}
 #else
-	inline uint32 LoadLittleDWord( uint32 *base, unsigned int dwordIndex )
+	/*inline uint32 LoadLittleDWord( uint32 *base, unsigned int dwordIndex )
 	{
 		return LittleDWord( base[dwordIndex] );
 	}
 
 	inline void StoreLittleDWord( uint32 *base, unsigned int dwordIndex, uint32 dword )
+	{
+		base[dwordIndex] = LittleDWord(dword);
+	}*/
+
+	FORCEINLINE unsigned long LoadLittleDWord(const unsigned long* base, unsigned int dwordIndex)
+	{
+		return LittleDWord(base[dwordIndex]);
+	}
+
+	FORCEINLINE void StoreLittleDWord(unsigned long* base, unsigned int dwordIndex, unsigned long dword)
 	{
 		base[dwordIndex] = LittleDWord(dword);
 	}
@@ -1284,6 +1300,24 @@ template <class T, typename ARG1, typename ARG2, typename ARG3, typename ARG4, t
 inline T* Construct( T* pMemory, ARG1 a1, ARG2 a2, ARG3 a3, ARG4 a4, ARG5 a5 )
 {
 	return ::new( pMemory ) T( a1, a2, a3, a4, a5 );
+}
+
+template <class T, class P>
+inline void ConstructOneArg( T* pMemory, P const& arg)
+{
+	::new( pMemory ) T(arg);
+}
+
+template <class T, class P1, class P2 >
+inline void ConstructTwoArg( T* pMemory, P1 const& arg1, P2 const& arg2)
+{
+	::new( pMemory ) T(arg1, arg2);
+}
+
+template <class T, class P1, class P2, class P3 >
+inline void ConstructThreeArg( T* pMemory, P1 const& arg1, P2 const& arg2, P3 const& arg3)
+{
+	::new( pMemory ) T(arg1, arg2, arg3);
 }
 
 template <class T>

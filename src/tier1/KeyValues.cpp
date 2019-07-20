@@ -68,7 +68,7 @@ public:
 			m_errorStack[m_errorIndex] = symName;
 		}
 		m_errorIndex++;
-		m_maxErrorIndex = MAX( m_maxErrorIndex, (m_errorIndex-1) );
+		m_maxErrorIndex = max( m_maxErrorIndex, (m_errorIndex-1) );
 		return m_errorIndex-1;
 	}
 
@@ -2065,7 +2065,7 @@ bool EvaluateConditional( const char *str )
 		bNot = true;
 
 	if ( Q_stristr( str, "$X360" ) )
-		return IsPlatformX360() ^ bNot;
+		return IsX360() ^ bNot;
 	
 	if ( Q_stristr( str, "$WIN32" ) )
 		return IsPC() ^ bNot; // hack hack - for now WIN32 really means IsPC
@@ -2074,13 +2074,13 @@ bool EvaluateConditional( const char *str )
 		return IsPlatformWindows() ^ bNot;
 	
 	if ( Q_stristr( str, "$OSX" ) )
-		return IsPlatformOSX() ^ bNot;
+		return IsOSX() ^ bNot;
 	
 	if ( Q_stristr( str, "$LINUX" ) )
-		return IsPlatformLinux() ^ bNot;
+		return IsLinux() ^ bNot;
 
 	if ( Q_stristr( str, "$POSIX" ) )
-		return IsPlatformPosix() ^ bNot;
+		return IsPosix() ^ bNot;
 	
 	return false;
 }

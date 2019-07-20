@@ -34,7 +34,7 @@
 
 // Data descriptions for byte swapping - only needed
 // for structures that are written to file for use by the game.
-BEGIN_BYTESWAP_DATADESC( dheader_t )
+BEGIN_BYTESWAP_DATADESC( BSPHeader_t )
 	DEFINE_FIELD( ident, FIELD_INTEGER ),
 	DEFINE_FIELD( version, FIELD_INTEGER ),
 	DEFINE_EMBEDDED_ARRAY( lumps, HEADER_LUMPS ),

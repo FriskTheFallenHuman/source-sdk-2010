@@ -10,6 +10,7 @@
 #define TIER1_STRTOOLS_H
 
 #include "tier0/platform.h"
+#include "tier0/basetypes.h"
 
 #include <ctype.h>
 #include <stdarg.h>
