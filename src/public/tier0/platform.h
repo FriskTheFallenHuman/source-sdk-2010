@@ -1628,7 +1628,7 @@ extern int V_tier0_stricmp(const char *s1, const char *s2 );
 #define stricmp(s1,s2) V_tier0_stricmp( s1, s2 )
 #define strcmpi(s1,s2) V_tier0_stricmp( s1, s2 )
 #else
-int	_V_stricmp	  (const char *s1, const char *s2 );
+int	V_stricmp	  (const char *s1, const char *s2 );
 int	V_strncasecmp (const char *s1, const char *s2, int n);
 
 // A special high-performance case-insensitive compare function that in
@@ -1639,8 +1639,8 @@ int	V_strncasecmp (const char *s1, const char *s2, int n);
 //   returns <0 if strings do not match even in a case-insensitive way
 int	_V_stricmp_NegativeForUnequal	  ( const char *s1, const char *s2 );
 
-#define stricmp(s1,s2) _V_stricmp(s1, s2)
-#define strcmpi(s1,s2) _V_stricmp(s1, s2)
+#define stricmp(s1,s2) V_stricmp(s1, s2)
+#define strcmpi(s1,s2) V_stricmp(s1, s2)
 #define strnicmp V_strncasecmp 
 #endif
 

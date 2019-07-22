@@ -20,12 +20,6 @@
 #ifndef POSIX
 // NOTE - linux doesn't need any of this code!
 
-extern "C"
-{
-	extern void __stdcall Sleep( unsigned long ms );
-};
-
-
 class CFileRead
 {
 public:
