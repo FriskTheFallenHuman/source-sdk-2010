@@ -868,7 +868,7 @@ void CBaseFileSystem::RemoveVPKFile(char const* pszName)
 
 void CBaseFileSystem::GetVPKFileNames(CUtlVector<CUtlString>& destVector)
 {
-	CSearchPathsIterator it(this, &pszName, "GAME", FILTER_CULLNONPACK);
+	CSearchPathsIterator it(this, "GAME", FILTER_CULLNONPACK);
 
 	CPackFile* pPack;
 	for (CSearchPath* pPath = it.GetFirst(); !pPath; pPath = it.GetNext())
@@ -1213,7 +1213,7 @@ bool CVPKFile::FindNext(WIN32_FIND_DATA* dat)
 				dat->dwFileAttributes &= ~FILE_ATTRIBUTE_DIRECTORY;
 				return true;
 			}
-			m_iCurrentFile = -1;
+			m_iCurrentFile = (UtlSymId_t)-1;
 		}
 	}
 	m_iCurrentPath = 0;
@@ -3962,7 +3962,7 @@ long CBaseFileSystem::GetFileTime( const char *pFileName, const char *pPathID )
 
 	CHECK_DOUBLE_SLASHES( pFileName );
 
-	CSearchPathsIterator iter( this, &pFileName, pPathID );
+	CSearchPathsIterator iter( this, &pFileName, pPathID, FILTER_NONE );
 
 	char tempFileName[MAX_PATH];
 	Q_strncpy( tempFileName, pFileName, sizeof(tempFileName) );

@@ -53,28 +53,19 @@ class CTier1AppSystem : public CTier0AppSystem< IInterface >
 	typedef CTier0AppSystem< IInterface > BaseClass;
 
 public:
-	CTier1AppSystem( bool bIsPrimaryAppSystem = true ) : BaseClass(	bIsPrimaryAppSystem )
-	{
-	}
 
 	virtual bool Connect( CreateInterfaceFn factory ) 
 	{
 		if ( !BaseClass::Connect( factory ) )
 			return false;
 
-		if ( BaseClass::IsPrimaryAppSystem() )
-		{
-			ConnectTier1Libraries( &factory, 1 );
-		}
+		ConnectTier1Libraries( &factory, 1 );
 		return true;
 	}
 
 	virtual void Disconnect() 
 	{
-		if ( BaseClass::IsPrimaryAppSystem() )
-		{
-			DisconnectTier1Libraries();
-		}
+		DisconnectTier1Libraries();
 		BaseClass::Disconnect();
 	}
 
@@ -84,7 +75,7 @@ public:
 		if ( nRetVal != INIT_OK )
 			return nRetVal;
 
-		if ( g_pCVar && BaseClass::IsPrimaryAppSystem() )
+		if ( g_pCVar )
 		{
 			ConVar_Register( ConVarFlag );
 		}
@@ -93,7 +84,7 @@ public:
 
 	virtual void Shutdown()
 	{
-		if ( g_pCVar && BaseClass::IsPrimaryAppSystem() )
+		if ( g_pCVar )
 		{
 			ConVar_Unregister( );
 		}

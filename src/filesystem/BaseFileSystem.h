@@ -594,15 +594,16 @@ public:
 
 	virtual void			SyncDvdDevCache() {}
 
-	virtual bool			GetStringFromKVPool(CRC32_t poolKey, unsigned int key, char* pOutBuff, int buflen) {}
+#pragma message("IMPLEMENT ME")
+	virtual bool			GetStringFromKVPool(CRC32_t poolKey, unsigned int key, char* pOutBuff, int buflen) { return false; }
 
-	virtual bool			DiscoverDLC(int iController) {}
-	virtual int				IsAnyDLCPresent(bool* pbDLCSearchPathMounted = NULL) {}
-	virtual bool			GetAnyDLCInfo(int iDLC, unsigned int* pLicenseMask, wchar_t* pTitleBuff, int nOutTitleSize) {}
-	virtual int				IsAnyCorruptDLC() {}
-	virtual bool			GetAnyCorruptDLCInfo(int iCorruptDLC, wchar_t* pTitleBuff, int nOutTitleSize) {}
-	virtual bool			AddDLCSearchPaths() {}
-	virtual bool			IsSpecificDLCPresent(unsigned int nDLCPackage) {}
+	virtual bool			DiscoverDLC(int iController) { return false; }
+	virtual int				IsAnyDLCPresent(bool* pbDLCSearchPathMounted = NULL) { return 0; }
+	virtual bool			GetAnyDLCInfo(int iDLC, unsigned int* pLicenseMask, wchar_t* pTitleBuff, int nOutTitleSize) { return false; }
+	virtual int				IsAnyCorruptDLC() { return 0; }
+	virtual bool			GetAnyCorruptDLCInfo(int iCorruptDLC, wchar_t* pTitleBuff, int nOutTitleSize) { return false; }
+	virtual bool			AddDLCSearchPaths() { return false; }
+	virtual bool			IsSpecificDLCPresent(unsigned int nDLCPackage) { return false; }
 
 	// call this to look for CPU-hogs during loading processes. When you set this, a breakpoint
 	// will be issued whenever the indicated # of seconds go by without an i/o request.  Passing
