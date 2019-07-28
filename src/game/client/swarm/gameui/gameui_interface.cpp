@@ -178,7 +178,7 @@ void CGameUI::Initialize( CreateInterfaceFn factory )
 	bik = (IBik*)factory( BIK_INTERFACE_VERSION, NULL );
 
 #ifndef _X360
-	SteamAPI_InitSafe();
+	SteamAPI_Init();
 	steamapicontext->Init();
 #endif
 

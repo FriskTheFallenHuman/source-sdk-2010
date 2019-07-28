@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright ï¿½ 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: interface to utility functions in Steam
 //
@@ -10,7 +10,7 @@
 #pragma once
 #endif
 
-#include "isteamclient.h"
+#include "steam_api_common.h"
 
 
 // Steam API call failure results
@@ -24,6 +24,23 @@ enum ESteamAPICallFailure
 	k_ESteamAPICallFailureInvalidHandle = 2,	// the SteamAPICall_t handle passed in no longer exists
 	k_ESteamAPICallFailureMismatchedCallback = 3,// GetAPICallResult() was called with the wrong callback type for this API call
 };
+
+
+// Input modes for the Big Picture gamepad text entry
+enum EGamepadTextInputMode
+{
+	k_EGamepadTextInputModeNormal = 0,
+	k_EGamepadTextInputModePassword = 1
+};
+
+
+// Controls number of allowed lines for the Big Picture gamepad text entry
+enum EGamepadTextInputLineMode
+{
+	k_EGamepadTextInputLineModeSingleLine = 0,
+	k_EGamepadTextInputLineModeMultipleLines = 1
+};
+
 
 // function prototype for warning message hook
 #if defined( POSIX )
@@ -44,7 +61,7 @@ public:
 	// the universe this client is connecting to
 	virtual EUniverse GetConnectedUniverse() = 0;
 
-	// Steam server time - in PST, number of seconds since January 1, 1970 (i.e unix time)
+	// Steam server time.  Number of seconds since January 1, 1970, GMT (i.e unix time)
 	virtual uint32 GetServerRealTime() = 0;
 
 	// returns the 2 digit ISO 3166-1-alpha-2 format country code this client is running in (as looked up via an IP-to-location database)
@@ -78,9 +95,8 @@ public:
 	virtual ESteamAPICallFailure GetAPICallFailureReason( SteamAPICall_t hSteamAPICall ) = 0;
 	virtual bool GetAPICallResult( SteamAPICall_t hSteamAPICall, void *pCallback, int cubCallback, int iCallbackExpected, bool *pbFailed ) = 0;
 
-	// this needs to be called every frame to process matchmaking results
-	// redundant if you're already calling SteamAPI_RunCallbacks()
-	virtual void RunFrame() = 0;
+	// Deprecated. Applications should use SteamAPI_RunCallbacks() instead. Game servers do not need to call this function.
+	STEAM_PRIVATE_API( virtual void RunFrame() = 0; )
 
 	// returns the number of IPC calls made since the last time this function was called
 	// Used for perf debugging so you can understand how many IPC calls your game makes per frame
@@ -109,15 +125,85 @@ public:
 	// refresh the screen with Present or SwapBuffers to allow the overlay to do it's work.
 	virtual bool BOverlayNeedsPresent() = 0;
 
-	// Asynchronous call to check if file is signed, result is returned in CheckFileSignature_t
+	// Asynchronous call to check if an executable file has been signed using the public key set on the signing tab
+	// of the partner site, for example to refuse to load modified executable files.  
+	// The result is returned in CheckFileSignature_t.
+	//   k_ECheckFileSignatureNoSignaturesFoundForThisApp - This app has not been configured on the signing tab of the partner site to enable this function.
+	//   k_ECheckFileSignatureNoSignaturesFoundForThisFile - This file is not listed on the signing tab for the partner site.
+	//   k_ECheckFileSignatureFileNotFound - The file does not exist on disk.
+	//   k_ECheckFileSignatureInvalidSignature - The file exists, and the signing tab has been set for this file, but the file is either not signed or the signature does not match.
+	//   k_ECheckFileSignatureValidSignature - The file is signed and the signature is valid.
+	STEAM_CALL_RESULT( CheckFileSignature_t )
 	virtual SteamAPICall_t CheckFileSignature( const char *szFileName ) = 0;
+
+	// Activates the Big Picture text input dialog which only supports gamepad input
+	virtual bool ShowGamepadTextInput( EGamepadTextInputMode eInputMode, EGamepadTextInputLineMode eLineInputMode, const char *pchDescription, uint32 unCharMax, const char *pchExistingText ) = 0;
+
+	// Returns previously entered text & length
+	virtual uint32 GetEnteredGamepadTextLength() = 0;
+	virtual bool GetEnteredGamepadTextInput( char *pchText, uint32 cchText ) = 0;
+
+	// returns the language the steam client is running in, you probably want ISteamApps::GetCurrentGameLanguage instead, this is for very special usage cases
+	virtual const char *GetSteamUILanguage() = 0;
+
+	// returns true if Steam itself is running in VR mode
+	virtual bool IsSteamRunningInVR() = 0;
+	
+	// Sets the inset of the overlay notification from the corner specified by SetOverlayNotificationPosition.
+	virtual void SetOverlayNotificationInset( int nHorizontalInset, int nVerticalInset ) = 0;
+
+	// returns true if Steam & the Steam Overlay are running in Big Picture mode
+	// Games much be launched through the Steam client to enable the Big Picture overlay. During development,
+	// a game can be added as a non-steam game to the developers library to test this feature
+	virtual bool IsSteamInBigPictureMode() = 0;
+
+	// ask SteamUI to create and render its OpenVR dashboard
+	virtual void StartVRDashboard() = 0;
+
+	// Returns true if the HMD content will be streamed via Steam In-Home Streaming
+	virtual bool IsVRHeadsetStreamingEnabled() = 0;
+
+	// Set whether the HMD content will be streamed via Steam In-Home Streaming
+	// If this is set to true, then the scene in the HMD headset will be streamed, and remote input will not be allowed.
+	// If this is set to false, then the application window will be streamed instead, and remote input will be allowed.
+	// The default is true unless "VRHeadsetStreaming" "0" is in the extended appinfo for a game.
+	// (this is useful for games that have asymmetric multiplayer gameplay)
+	virtual void SetVRHeadsetStreamingEnabled( bool bEnabled ) = 0;
+
+	// Returns whether this steam client is a Steam China specific client, vs the global client.
+	virtual bool IsSteamChinaLauncher() = 0;
+
+	// Initializes text filtering.
+	//   Returns false if filtering is unavailable for the language the user is currently running in.
+	virtual bool InitFilterText() = 0; 
+
+	// Filters the provided input message and places the filtered result into pchOutFilteredText.
+	//   pchOutFilteredText is where the output will be placed, even if no filtering or censoring is performed
+	//   nByteSizeOutFilteredText is the size (in bytes) of pchOutFilteredText
+	//   pchInputText is the input string that should be filtered, which can be ASCII or UTF-8
+	//   bLegalOnly should be false if you want profanity and legally required filtering (where required) and true if you want legally required filtering only
+	//   Returns the number of characters (not bytes) filtered.
+	virtual int FilterText( char* pchOutFilteredText, uint32 nByteSizeOutFilteredText, const char * pchInputMessage, bool bLegalOnly ) = 0;
 };
 
-#define STEAMUTILS_INTERFACE_VERSION "SteamUtils005"
+#define STEAMUTILS_INTERFACE_VERSION "SteamUtils009"
 
+// Global interface accessor
+inline ISteamUtils *SteamUtils();
+STEAM_DEFINE_INTERFACE_ACCESSOR( ISteamUtils *, SteamUtils, SteamInternal_FindOrCreateUserInterface( 0, STEAMUTILS_INTERFACE_VERSION ) );
+
+// Global accessor for the gameserver client
+inline ISteamUtils *SteamGameServerUtils();
+STEAM_DEFINE_INTERFACE_ACCESSOR( ISteamUtils *, SteamGameServerUtils, SteamInternal_FindOrCreateGameServerInterface( 0, STEAMUTILS_INTERFACE_VERSION ) );
 
 // callbacks
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error steam_api_common.h should define VALVE_CALLBACK_PACK_xxx
+#endif 
 
 //-----------------------------------------------------------------------------
 // Purpose: The country of the user changed
@@ -145,6 +231,8 @@ struct SteamAPICallCompleted_t
 {
 	enum { k_iCallback = k_iSteamUtilsCallbacks + 3 };
 	SteamAPICall_t m_hAsyncCall;
+	int m_iCallback;
+	uint32 m_cubParam;
 };
 
 
@@ -176,6 +264,22 @@ struct CheckFileSignature_t
 	enum { k_iCallback = k_iSteamUtilsCallbacks + 5 };
 	ECheckFileSignature m_eCheckFileSignature;
 };
+
+
+// k_iSteamUtilsCallbacks + 13 is taken
+
+
+//-----------------------------------------------------------------------------
+// Big Picture gamepad text input has been closed
+//-----------------------------------------------------------------------------
+struct GamepadTextInputDismissed_t
+{
+	enum { k_iCallback = k_iSteamUtilsCallbacks + 14 };
+	bool m_bSubmitted;										// true if user entered & accepted text (Call ISteamUtils::GetEnteredGamepadTextInput() for text), false if canceled input
+	uint32 m_unSubmittedText;
+};
+
+// k_iSteamUtilsCallbacks + 15 is taken
 
 #pragma pack( pop )
 

@@ -643,7 +643,7 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
 		return false;
 
 #if !defined( SWDS ) && !defined(NO_STEAM)
-	SteamAPI_InitSafe();
+	SteamAPI_Init();
 	s_SteamAPIContext.Init();
 #endif
 #if !defined(NO_STEAM)

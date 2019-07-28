@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//====== Copyright Â© 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: interface to steam managing network connections between game clients & servers
 //
@@ -10,9 +10,7 @@
 #pragma once
 #endif
 
-#include "steamtypes.h"
-#include "steamclientpublic.h"
-
+#include "steam_api_common.h"
 
 // list of possible errors returned by SendP2PPacket() API
 // these will be posted in the P2PSessionConnectFail_t callback
@@ -25,7 +23,7 @@ enum EP2PSessionError
 	k_EP2PSessionErrorTimeout = 4,					// target isn't responding, perhaps not calling AcceptP2PSessionWithUser()
 													// corporate firewalls can also block this (NAT traversal is not firewall traversal)
 													// make sure that UDP ports 3478, 4379, and 4380 are open in an outbound direction
-
+	k_EP2PSessionErrorMax = 5
 };
 
 // SendP2PPacket() send types
@@ -58,7 +56,13 @@ enum EP2PSend
 
 // connection state to a specified user, returned by GetP2PSessionState()
 // this is under-the-hood info about what's going on with a SendP2PPacket(), shouldn't be needed except for debuggin
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error steam_api_common.h should define VALVE_CALLBACK_PACK_xxx
+#endif 
 struct P2PSessionState_t
 {
 	uint8 m_bConnectionActive;		// true if we've got an active open connection
@@ -121,24 +125,34 @@ class ISteamNetworking
 {
 public:
 	////////////////////////////////////////////////////////////////////////////////////////////
-	// Session-less connection functions
-	//    automatically establishes NAT-traversing or Relay server connections
+	//
+	// UDP-style (connectionless) networking interface.  These functions send messages using
+	// an API organized around the destination.  Reliable and unreliable messages are supported.
+	//
+	// For a more TCP-style interface (meaning you have a connection handle), see the functions below.
+	// Both interface styles can send both reliable and unreliable messages.
+	//
+	// Automatically establishes NAT-traversing or Relay server connections
 
 	// Sends a P2P packet to the specified user
 	// UDP-like, unreliable and a max packet size of 1200 bytes
 	// the first packet send may be delayed as the NAT-traversal code runs
 	// if we can't get through to the user, an error will be posted via the callback P2PSessionConnectFail_t
 	// see EP2PSend enum above for the descriptions of the different ways of sending packets
-	virtual bool SendP2PPacket( CSteamID steamIDRemote, const void *pubData, uint32 cubData, EP2PSend eP2PSendType ) = 0;
+	//
+	// nChannel is a routing number you can use to help route message to different systems 	- you'll have to call ReadP2PPacket() 
+	// with the same channel number in order to retrieve the data on the other end
+	// using different channels to talk to the same user will still use the same underlying p2p connection, saving on resources
+	virtual bool SendP2PPacket( CSteamID steamIDRemote, const void *pubData, uint32 cubData, EP2PSend eP2PSendType, int nChannel = 0 ) = 0;
 
 	// returns true if any data is available for read, and the amount of data that will need to be read
-	virtual bool IsP2PPacketAvailable( uint32 *pcubMsgSize ) = 0;
+	virtual bool IsP2PPacketAvailable( uint32 *pcubMsgSize, int nChannel = 0 ) = 0;
 
 	// reads in a packet that has been sent from another user via SendP2PPacket()
 	// returns the size of the message and the steamID of the user who sent it in the last two parameters
 	// if the buffer passed in is too small, the message will be truncated
 	// this call is not blocking, and will return false if no data is available
-	virtual bool ReadP2PPacket( void *pubDest, uint32 cubDest, uint32 *pcubMsgSize, CSteamID *psteamIDRemote ) = 0;
+	virtual bool ReadP2PPacket( void *pubDest, uint32 cubDest, uint32 *pcubMsgSize, CSteamID *psteamIDRemote, int nChannel = 0 ) = 0;
 
 	// AcceptP2PSessionWithUser() should only be called in response to a P2PSessionRequest_t callback
 	// P2PSessionRequest_t will be posted if another user tries to send you a packet that you haven't talked to yet
@@ -152,18 +166,37 @@ public:
 	// if the remote user tries to send data to you again, another P2PSessionRequest_t callback will be posted
 	virtual bool CloseP2PSessionWithUser( CSteamID steamIDRemote ) = 0;
 
+	// call CloseP2PChannelWithUser() when you're done talking to a user on a specific channel. Once all channels
+	// open channels to a user have been closed, the open session to the user will be closed and new data from this
+	// user will trigger a P2PSessionRequest_t callback
+	virtual bool CloseP2PChannelWithUser( CSteamID steamIDRemote, int nChannel ) = 0;
+
 	// fills out P2PSessionState_t structure with details about the underlying connection to the user
 	// should only needed for debugging purposes
 	// returns false if no connection exists to the specified user
 	virtual bool GetP2PSessionState( CSteamID steamIDRemote, P2PSessionState_t *pConnectionState ) = 0;
 
+	// Allow P2P connections to fall back to being relayed through the Steam servers if a direct connection
+	// or NAT-traversal cannot be established. Only applies to connections created after setting this value,
+	// or to existing connections that need to automatically reconnect after this value is set.
+	//
+	// P2P packet relay is allowed by default
+	virtual bool AllowP2PPacketRelay( bool bAllow ) = 0;
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////
-	// LISTEN / CONNECT style interface functions
 	//
-	// This is an older set of functions designed around the Berkeley TCP sockets model
-	// it's preferential that you use the above P2P functions, they're more robust
-	// and these older functions will be removed eventually
+	// LISTEN / CONNECT connection-oriented interface functions
+	//
+	// These functions are more like a client-server TCP API.  One side is the "server"
+	// and "listens" for incoming connections, which then must be "accepted."  The "client"
+	// initiates a connection by "connecting."  Sending and receiving is done through a
+	// connection handle.
+	//
+	// For a more UDP-style interface, where you do not track connection handles but
+	// simply send messages to a SteamID, use the UDP-style functions above.
+	//
+	// Both methods can send both reliable and unreliable methods.
 	//
 	////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -237,10 +270,24 @@ public:
 	// max packet size, in bytes
 	virtual int GetMaxPacketSize( SNetSocket_t hSocket ) = 0;
 };
-#define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking003"
+#define STEAMNETWORKING_INTERFACE_VERSION "SteamNetworking005"
+
+// Global interface accessor
+inline ISteamNetworking *SteamNetworking();
+STEAM_DEFINE_USER_INTERFACE_ACCESSOR( ISteamNetworking *, SteamNetworking, STEAMNETWORKING_INTERFACE_VERSION );
+
+// Global accessor for the gameserver client
+inline ISteamNetworking *SteamGameServerNetworking();
+STEAM_DEFINE_GAMESERVER_INTERFACE_ACCESSOR( ISteamNetworking *, SteamGameServerNetworking, STEAMNETWORKING_INTERFACE_VERSION );
 
 // callbacks
+#if defined( VALVE_CALLBACK_PACK_SMALL )
+#pragma pack( push, 4 )
+#elif defined( VALVE_CALLBACK_PACK_LARGE )
 #pragma pack( push, 8 )
+#else
+#error steam_api_common.h should define VALVE_CALLBACK_PACK_xxx
+#endif 
 
 // callback notification - a user wants to talk to us over the P2P channel via the SendP2PPacket() API
 // in response, a call to AcceptP2PPacketsFromUser() needs to be made, if you want to talk with them

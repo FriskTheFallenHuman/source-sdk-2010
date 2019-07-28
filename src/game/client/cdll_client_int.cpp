@@ -1082,7 +1082,7 @@ int CHLClient::Connect( CreateInterfaceFn appSystemFactory, CGlobalVarsBase *pGl
 	ConnectTier3Libraries( &appSystemFactory, 1 );
 
 #ifndef _X360
-	SteamAPI_InitSafe();
+	SteamAPI_Init();
 	g_SteamAPIContext.Init();
 
 #ifdef INFESTED_DLL

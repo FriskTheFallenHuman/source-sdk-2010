@@ -12,6 +12,7 @@
 #include "iasw_spawnable_npc.h"
 #include "asw_lag_compensation.h"
 #include "asw_shareddefs.h"
+#include "tier1/utlqueue.h"
 
 class CASW_AI_Senses;
 class TakeDamageInfo;
@@ -173,7 +174,7 @@ public:
 	CNetworkVar(bool, m_bElectroStunned);
 	//CNetworkVar(bool, m_bGibber);
 	CNetworkVar( DeathStyle_t, m_nDeathStyle );
-	CUtlQueueFixed< CTakeDamageInfo, ASW_NUM_RECENT_DAMAGE >	m_RecentDamage;
+	CUtlQueue< CTakeDamageInfo >	m_RecentDamage;
 	// act busy
 	bool			CreateBehaviors();
 	int SelectSchedule();
