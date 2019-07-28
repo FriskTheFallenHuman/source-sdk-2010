@@ -334,7 +334,7 @@ void Label::SetText(const wchar_t *unicodeString, bool bClearUnlocalizedSymbol)
 void Label::OnDialogVariablesChanged(KeyValues *dialogVariables )
 {
 	StringIndex_t index = _textImage->GetUnlocalizedTextSymbol();
-	if (index != INVALID_LOCALIZE_STRING_INDEX)
+	if (index != INVALID_STRING_INDEX)
 	{
 		// reconstruct the string from the variables
 		wchar_t buf[1024];

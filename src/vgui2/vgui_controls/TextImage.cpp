@@ -39,7 +39,7 @@ TextImage::TextImage(const char *text) : Image()
 	_textBufferLen = 0;
 	_font = INVALID_FONT; 
 	_fallbackFont = INVALID_FONT;
-	_unlocalizedTextSymbol = INVALID_LOCALIZE_STRING_INDEX;
+	_unlocalizedTextSymbol = INVALID_STRING_INDEX;
 	_drawWidth = 0;
 	_textBufferLen = 0;
 	_textLen = 0;
@@ -64,7 +64,7 @@ TextImage::TextImage(const wchar_t *wszText) : Image()
 	_textBufferLen = 0;
 	_font = INVALID_FONT;
 	_fallbackFont = INVALID_FONT;
-	_unlocalizedTextSymbol = INVALID_LOCALIZE_STRING_INDEX;
+	_unlocalizedTextSymbol = INVALID_STRING_INDEX;
 	_drawWidth = 0;
 	_textBufferLen = 0;
 	_textLen = 0;
@@ -103,7 +103,7 @@ void TextImage::SetText(const char *text)
 		// try lookup in localization tables
 		_unlocalizedTextSymbol = g_pVGuiLocalize->FindIndex(text + 1);
 		
-		if (_unlocalizedTextSymbol != INVALID_LOCALIZE_STRING_INDEX)
+		if (_unlocalizedTextSymbol != INVALID_STRING_INDEX)
 		{
 			wchar_t *unicode = g_pVGuiLocalize->GetValueByIndex(_unlocalizedTextSymbol);
 			SetText(unicode);
@@ -197,7 +197,7 @@ void TextImage::SetText(const wchar_t *unicode, bool bClearUnlocalizedSymbol)
 	{
 		// Clear out unlocalized text symbol so that changing dialog variables
 		// doesn't stomp over the custom unicode string we're being set to.
-		_unlocalizedTextSymbol = INVALID_LOCALIZE_STRING_INDEX;
+		_unlocalizedTextSymbol = INVALID_STRING_INDEX;
 	}
 
 	if (!unicode)
@@ -262,7 +262,7 @@ void TextImage::GetText(wchar_t *buffer, int bufLenInBytes)
 //-----------------------------------------------------------------------------
 void TextImage::GetUnlocalizedText(char *buffer, int bufferSize)
 {
-	if (_unlocalizedTextSymbol != INVALID_LOCALIZE_STRING_INDEX)
+	if (_unlocalizedTextSymbol != INVALID_STRING_INDEX)
 	{
 		const char *text = g_pVGuiLocalize->GetNameByIndex(_unlocalizedTextSymbol);
 		buffer[0] = '#';

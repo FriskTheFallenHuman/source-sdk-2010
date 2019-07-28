@@ -1336,7 +1336,7 @@ void Frame::SetTitle(const char *title, bool surfaceTitle)
 	{
 		// try lookup in localization tables
 		StringIndex_t unlocalizedTextSymbol = g_pVGuiLocalize->FindIndex(newTitle + 1);
-		if (unlocalizedTextSymbol != INVALID_LOCALIZE_STRING_INDEX)
+		if (unlocalizedTextSymbol != INVALID_STRING_INDEX)
 		{
 			// we have a new text value
 			wcsncpy( unicodeText, g_pVGuiLocalize->GetValueByIndex(unlocalizedTextSymbol), sizeof( unicodeText) / sizeof(wchar_t) );
@@ -2286,7 +2286,7 @@ void Frame::SetDeleteSelfOnClose( bool state )
 void Frame::OnDialogVariablesChanged( KeyValues *dialogVariables )
 {
 	StringIndex_t index = _title->GetUnlocalizedTextSymbol();
-	if (index != INVALID_LOCALIZE_STRING_INDEX)
+	if (index != INVALID_STRING_INDEX)
 	{
 		// reconstruct the string from the variables
 		wchar_t buf[1024];

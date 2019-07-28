@@ -1419,7 +1419,7 @@ void ListPanel::GetCellText(int itemID, int col, wchar_t *wbuffer, int bufferSiz
 	if ( val[ 0 ] == '#' )
 	{
 		StringIndex_t si = g_pVGuiLocalize->FindIndex( val + 1 );
-		if ( si != INVALID_LOCALIZE_STRING_INDEX )
+		if ( si != INVALID_STRING_INDEX )
 		{
 			wval = g_pVGuiLocalize->GetValueByIndex( si );
 		}

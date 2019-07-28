@@ -531,7 +531,7 @@ void ComboBox::OnSetText(const wchar_t *newtext)
 		// try lookup in localization tables
 		StringIndex_t unlocalizedTextSymbol = g_pVGuiLocalize->FindIndex(cbuf + 1);
 		
-		if (unlocalizedTextSymbol != INVALID_LOCALIZE_STRING_INDEX)
+		if (unlocalizedTextSymbol != INVALID_STRING_INDEX)
 		{
 			// we have a new text value
 			text = g_pVGuiLocalize->GetValueByIndex(unlocalizedTextSymbol);

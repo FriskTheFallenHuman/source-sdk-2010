@@ -144,7 +144,7 @@ public:
 
 		// lookup the value
 		StringIndex_t val = g_pVGuiLocalize->FindIndex(token);
-		if (val != INVALID_LOCALIZE_STRING_INDEX)
+		if (val != INVALID_STRING_INDEX)
 		{
 			m_pValueEntry->SetText(g_pVGuiLocalize->GetValueByIndex(val));
 

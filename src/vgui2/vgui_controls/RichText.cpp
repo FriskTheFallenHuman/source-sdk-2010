@@ -350,7 +350,7 @@ const wchar_t *RichText::ResolveLocalizedTextAndVariables( char const *pchLookup
 	{
 		// try lookup in localization tables
 		StringIndex_t index = g_pVGuiLocalize->FindIndex( pchLookup + 1 );
-		if ( index == INVALID_LOCALIZE_STRING_INDEX )
+		if ( index == INVALID_STRING_INDEX )
 		{
 /*			// if it's not found, maybe it's a special expanded variable - look for an expansion
 			char rgchT[MAX_PATH];
@@ -375,7 +375,7 @@ const wchar_t *RichText::ResolveLocalizedTextAndVariables( char const *pchLookup
 		}
 
 		// see if we have a valid string
-		if ( index != INVALID_LOCALIZE_STRING_INDEX )
+		if ( index != INVALID_STRING_INDEX )
 		{
 			wchar_t *format = g_pVGuiLocalize->GetValueByIndex( index );
 			Assert( format );
