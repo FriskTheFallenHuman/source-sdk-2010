@@ -31,6 +31,7 @@
 #include <malloc.h>
 #include <string.h>
 #include "tier1/utldict.h"
+#include "tier1/UtlStringMap.h"
 
 #elif defined(_LINUX)
 	#include <unistd.h> // unlink
@@ -370,6 +371,8 @@ public:
 	// Loads the pack file
 	virtual bool Prepare(int64 fileLen = -1, int64 nFileOfs = 0);
 	virtual bool FindFile(const char* pFilename, int& nIndex, int64& nOffset, int& nLength);
+	virtual bool FindFirst(const char* pWildCard, WIN32_FIND_DATA* dat);
+	virtual bool FindNext(WIN32_FIND_DATA* dat);
 	virtual int  ReadFromPack(int nIndex, void* buffer, int nDestBytes, int nBytes, int64 nOffset);
 
 	int64 GetPackFileBaseOffset() { return m_nBaseOffset; }
@@ -378,17 +381,16 @@ public:
 
 	inline bool	UsesVolumes() { return m_bVolumes; }
 
-	CUtlStringMap<CUtlStringMap<CUtlStringMap<CVPKFileEntry*>*>*> m_Extensions;
 private:
 	bool m_bVolumes;
 	unsigned int m_nVersion;
 	CVPKFileEntry* m_pLastRequest;
+	char m_pWildCard[MAX_FILEPATH];
+	UtlSymId_t m_iCurrentExtension;
+	UtlSymId_t m_iCurrentPath;
+	UtlSymId_t m_iCurrentFile;
 protected:
-	//From VDC - https://developer.valvesoftware.com/wiki/VPK_File_Format#Tree
-
-	// Entries to the individual files stored inside the pack file.
-
-//	CVPKFileEntry m_VPKFiles;
+	CUtlStringMap<CUtlStringMap<CUtlStringMap<CVPKFileEntry*>*>*> m_Entries;
 
 };
 
@@ -451,6 +453,7 @@ abstract_class CBaseFileSystem : public CTier1AppSystem< IFileSystem >
 	friend class CPackFileHandle;
 	friend class CPackFile;
 	friend class CXZipPackFile;	
+	friend class CVPKFile;
 	friend class CFileHandle;
 	friend class CFileTracker;
 	friend class CFileOpenInfo;
@@ -583,90 +586,11 @@ public:
 	virtual int					GetSearchPathID(char* pPath, int nMaxLen);
 	virtual bool				FixupSearchPathsAfterInstall();
 
-	virtual void			AddVPKFile(char const* pszName, SearchPathAdd_t addType = PATH_ADD_TO_TAIL)
-	{
-		CPackFile* pf = NULL;
-		bool bVolumes = false;
-		char path[MAX_FILEPATH];
-		strcpy(path, pPath);
-		char pathlower[MAX_FILEPATH];
-		strcpy(pathlower, pPath);
-		V_strlower(pathlower);
+	virtual void				AddVPKFile(char const* pszName, SearchPathAdd_t addType = PATH_ADD_TO_TAIL);
 
-		//Try to open the vpk
-		FILE* dirvpk = Trace_FOpen(path, "rb", 0, NULL);
+	virtual void			RemoveVPKFile(char const* pszName);
 
-		//Not found? maybe this vpk uses volumes, try to open the one with "_dir" at the end
-		if (!dirvpk)
-		{
-			V_StripExtension(path, path, MAX_FILEPATH);
-			V_strncat(path, "_dir.vpk", MAX_FILEPATH, COPY_ALL_CHARACTERS);
-			dirvpk = Trace_FOpen(path, "rb", 0, NULL);
-			if (dirvpk)
-				bVolumes = true;
-			else
-				return;
-		}
-
-		VPK0_t vpkheader;
-		if (!FS_fread(&vpkheader, sizeof(vpkheader), dirvpk))
-			return;
-
-		pf = new CVPKFile(this, bVolumes, vpkheader.Version);
-		pf->m_hPackFileHandle = dirvpk;
-		pf->m_ZipName = pathlower;
-
-		FS_fseek(dirvpk, 0, FILESYSTEM_SEEK_TAIL);
-		int64 len = FS_ftell(dirvpk);
-		FS_fseek(dirvpk, 0, FILESYSTEM_SEEK_HEAD);
-
-		if (!pf->Prepare(len))
-		{
-			// Failed for some reason, ignore it
-			Trace_FClose(pf->m_hPackFileHandle);
-			pf->m_hPackFileHandle = NULL;
-			delete pf;
-
-			return;
-		}
-
-		int nIndex;
-		if (addType == PATH_ADD_TO_TAIL)
-			nIndex = m_SearchPaths.AddToTail();
-		else
-			nIndex = m_SearchPaths.AddToHead();
-
-		// Add this pack file to the search path:
-		CSearchPath* sp = &m_SearchPaths[nIndex];
-		pf->SetPath(pathlower);
-		pf->m_lPackFileTime = GetFileTime(path);
-
-		sp->SetPackFile(pf);
-		sp->m_storeId = g_iNextSearchPathID++;
-		sp->SetPath(g_PathIDTable.AddString(pathlower));
-		sp->m_pPathIDInfo = FindOrAddPathIDInfo(g_PathIDTable.AddString(pPathID), -1);
-	}
-
-
-	virtual void			RemoveVPKFile(char const* pszName)
-	{
-		CSearchPathsIterator it(this, &pszName, "GAME", FILTER_CULLNONPACK);
-
-		CPackFile* pPack;
-		for (CSearchPath* pPath = it.GetFirst(); !pPath; pPath = it.GetNext())
-		{
-			pPack = pPath->GetPackFile();;
-			if (pPack->m_bIsVPK && pPack->m_ZipName == pszName)
-			{
-				m_SearchPaths.FindAndRemove(*pPath);
-			}
-		}
-	}
-
-	virtual void			GetVPKFileNames(CUtlVector<CUtlString>& destVector)
-	{
-
-	}
+	virtual void			GetVPKFileNames(CUtlVector<CUtlString>& destVector);
 
 	virtual void			SyncDvdDevCache() {}
 
